@@ -16,6 +16,10 @@ namespace AttendanceTracker
     /// <summary>
     /// Interaction logic for Counter.xaml
     /// </summary>
+    /// 
+
+    // will need to add database logic in here rather than in MainWindow since we add
+    // componenets at runtime
     public partial class Counter : UserControl
     {
         

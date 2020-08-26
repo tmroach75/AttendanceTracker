@@ -31,21 +31,28 @@ namespace AttendanceTracker
     // Look into Control Templates
     public partial class MainWindow : Window
     {
-       
 
+        StackPanel currentPanel;
         public MainWindow()
         {
             DataContext = this;
             InitializeComponent();
+            currentPanel = new StackPanel();
+            currentPanel.Orientation = System.Windows.Controls.Orientation.Horizontal;
+            CounterStackPanel.Children.Add(currentPanel);
         }
-
-        // ideally, clicking the generatrNewCounter button should create a new counter and display it in
-        // an appropriate location
-        // maybe use a stack panel for this, which should also make the window stretch and be scrollable 
-        // whenever a new Counter component is created by the user
         private void generateNewCounter_Click(object sender, RoutedEventArgs e)
         {
             Counter customCounter = new Counter();
+            if (currentPanel.Children.Count == 2)
+            {
+                currentPanel = new StackPanel();
+                CounterStackPanel.Children.Add(currentPanel);
+                currentPanel.Orientation = System.Windows.Controls.Orientation.Horizontal;
+            }
+            currentPanel.Children.Add(customCounter);
         }
+
+        
     }
 }

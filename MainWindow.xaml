@@ -5,18 +5,34 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AttendanceTracker"
         mc:Ignorable="d"
-        Title="Attendance Manager - Home" Height="1000" Width="800">
+        Title="Attendance Manager - Home" Height="650" Width="750">
     <Grid>
-        <local:Counter CounterTitle="General" HorizontalAlignment="Left" Height="465" Margin="10,-37,0,0" VerticalAlignment="Top" Width="222"  />
+        <ScrollViewer>
+            <StackPanel x:Name="CounterStackPanel" Orientation="Vertical" Width="698" HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal">
+                    <local:Counter CounterTitle="General" />
+                    <local:Counter CounterTitle="Prospective" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <local:Counter/>
+                    <local:Counter />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <local:Counter />
+                    <local:Counter />
+                </StackPanel>
+                
+                <!--
+                <local:Counter CounterTitle="Staff" HorizontalAlignment="Left" Height="522" Margin="10,270,0,0" VerticalAlignment="Top" Width="238"/>
+                <local:Counter CounterTitle="Maps" HorizontalAlignment="Left" Height="459" Margin="239,270,0,0" VerticalAlignment="Top" Width="235"/>
+                <local:Counter CounterTitle="Clock-In" HorizontalAlignment="Left" Height="455" Margin="10,585,0,0" VerticalAlignment="Top" Width="221"/>
+                <local:Counter CounterTitle="Clock-Out" HorizontalAlignment="Left" Height="467" Margin="236,585,0,0" VerticalAlignment="Top" Width="209"/>
+                -->
+            </StackPanel>
+        </ScrollViewer>
 
-        <local:Counter CounterTitle="Prospective" HorizontalAlignment="Left" Height="474" Margin="239,-36,0,0" VerticalAlignment="Top" Width="206"/>
-        <local:Counter CounterTitle="Staff" HorizontalAlignment="Left" Height="522" Margin="10,270,0,0" VerticalAlignment="Top" Width="238"/>
-        <local:Counter CounterTitle="Maps" HorizontalAlignment="Left" Height="459" Margin="239,270,0,0" VerticalAlignment="Top" Width="235"/>
-        <local:Counter CounterTitle="Clock-In" HorizontalAlignment="Left" Height="455" Margin="10,585,0,0" VerticalAlignment="Top" Width="221"/>
-        <local:Counter CounterTitle="Clock-Out" HorizontalAlignment="Left" Height="467" Margin="236,585,0,0" VerticalAlignment="Top" Width="209"/>
-
-
+        <!-- Implement this after working stackpanel and database connection -->
         <Button x:Name="generateNewCounter" Content="Generate New Counter" HorizontalAlignment="Left" Margin="551,10,0,0" VerticalAlignment="Top" Click="generateNewCounter_Click"/>
-
+        
     </Grid>
 </Window>

@@ -4,16 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AttendanceTracker"
-             mc:Ignorable="d" Width="197" Height="460">
-    <Grid Margin="0,0,0,115">
-        <Button x:Name="incrementButton" Content="+" Height="20" Width="45" HorizontalAlignment="Left" Margin="121,150,0,0" VerticalAlignment="Top" Click="Button_Click" BorderBrush="Green" Grid.ColumnSpan="2"/>
-        <Label x:Name="title" Content="{Binding CounterTitle}"  HorizontalAlignment="Center" Margin="10,70,0,0" VerticalAlignment="Top" FontWeight="UltraBold" Height="26" Width="90" />
-        <Label x:Name="counterLabel" Content="0" HorizontalAlignment="Left" Margin="91,92,0,0" VerticalAlignment="Top" Height="26" Width="16"/>
-        <Button Content="-" HorizontalAlignment="Left" Margin="90,150,0,0" VerticalAlignment="Top" Click="Button_Click_1" Width="20" BorderBrush="Red" Height="20"/>
-        <TextBox Name="logNotes" LostFocus="logNotes_LostFocus" HorizontalAlignment="Left" Margin="56,118,0,0" VerticalAlignment="Top" Width="87" TextChanged="TextBox_TextChanged" Height="18"/>
-        <TextBox Name="watermarkedTxt" GotFocus="watermarkedTxt_GotFocus" Text="Enter log notes" HorizontalAlignment="Left" Margin="56,118,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="87" TextChanged="TextBox_TextChanged" Opacity=".5" Height="18"/>
-        <TextBox x:Name="generalTimestampLog" IsReadOnly="True" HorizontalAlignment="Left" Height="134" Margin="23,188,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="155" BorderBrush="Black" Grid.ColumnSpan="2"/>
-        <Button Content="Reset" HorizontalAlignment="Left" Height="20" Margin="39,150,0,0" VerticalAlignment="Top" Width="44" Click="Reset_General" BorderBrush="Red"/>
-        <Border BorderThickness="3" BorderBrush="#4b2e83" CornerRadius="5" HorizontalAlignment="Left" Height="271" Margin="8,70,0,0" VerticalAlignment="Top" Width="186" Grid.ColumnSpan="2"/>
+             mc:Ignorable="d" Width="197" Height="275">
+    <Grid Margin="0,71,0,0">
+        <Button x:Name="incrementButton" Content="+" Height="20" Width="46" HorizontalAlignment="Left" Margin="118,58,0,0" VerticalAlignment="Top" Click="Button_Click" BorderBrush="Green"/>
+        <Label x:Name="title" Content="{Binding CounterTitle}"  HorizontalAlignment="Center" Margin="53,-55,54,0" VerticalAlignment="Top" FontWeight="UltraBold" Height="26" Width="90" RenderTransformOrigin="0.506,0.5" />
+        <Label x:Name="counterLabel" Content="0" HorizontalAlignment="Left" Margin="88,-26,0,0" VerticalAlignment="Top" Height="26" Width="16"/>
+        <Button Content="-" HorizontalAlignment="Center" Margin="0,58,0,0" VerticalAlignment="Top" Click="Button_Click_1" Width="20" BorderBrush="Red" Height="20"/>
+        <TextBox Name="logNotes" LostFocus="logNotes_LostFocus" HorizontalAlignment="Center" Margin="0,6,0,0" VerticalAlignment="Top" Width="88" TextChanged="TextBox_TextChanged" Height="18"/>
+        <TextBox Name="watermarkedTxt" GotFocus="watermarkedTxt_GotFocus" Text="Enter log notes" HorizontalAlignment="Center" Margin="0,6,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="88" TextChanged="TextBox_TextChanged" Opacity=".5" Height="18"/>
+        <TextBox x:Name="generalTimestampLog" IsReadOnly="True" Height="100" TextWrapping="Wrap" Width="156" BorderBrush="Black" Margin="20,85,21,19"/>
+        <Button Content="Reset" HorizontalAlignment="Left" Height="20" Margin="36,58,0,0" VerticalAlignment="Top" Width="44" Click="Reset_General" BorderBrush="Red" RenderTransformOrigin="0.518,0.52"/>
+        <Border BorderThickness="3" BorderBrush="#4b2e83" CornerRadius="5" HorizontalAlignment="Center" Height="270" Margin="0,-67,0,0" VerticalAlignment="Top" Width="186"/>
     </Grid>
 </UserControl>
