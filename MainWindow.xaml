@@ -14,7 +14,7 @@
                     <local:Counter CounterTitle="Prospective" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <local:Counter/>
+                    <local:Counter CounterTitle="Staff"/>
                     <local:Counter />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
@@ -33,6 +33,8 @@
 
         <!-- Implement this after working stackpanel and database connection -->
         <Button x:Name="generateNewCounter" Content="Generate New Counter" HorizontalAlignment="Left" Margin="551,10,0,0" VerticalAlignment="Top" Click="generateNewCounter_Click"/>
+        <Button x:Name="clearDatabase" Content="Clear Database" FontWeight="ExtraBold" HorizontalAlignment="Left" Margin="551,50,0,0" VerticalAlignment="Top" BorderBrush="Red" BorderThickness="5" Click="clearDatabase_Click"/>
+        
         
     </Grid>
 </Window>

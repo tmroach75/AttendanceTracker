@@ -1,4 +1,5 @@
-﻿using System;
+﻿//using SQLite;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -10,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Data.SQLite;
+using System.Data;
 
 namespace AttendanceTracker
 {
@@ -25,10 +28,12 @@ namespace AttendanceTracker
         
 
         private int totalVisitors;
+        Database databaseObject;
         public Counter()
         {
             DataContext = this;
             InitializeComponent();
+            databaseObject = new Database();
         }
 
         public static DependencyProperty CounterTitleProperty = DependencyProperty.Register("CounterTitle", typeof(string), typeof(Counter));
@@ -68,6 +73,16 @@ namespace AttendanceTracker
             logNotes.Text = null;
             // reset watermark after counter is pressed
             generalTimestampLog.Text += totalVisitors + " - " + DateTime.Now + logNote + "\n";
+
+            // insert into database
+            string query = "INSERT INTO attendance ('timestamp', 'category', 'sum_type') VALUES (@timestamp, @category, @sum_type)";
+            SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
+            databaseObject.OpenConnection();
+            myCommand.Parameters.AddWithValue("@timestamp", DateTime.Now);
+            myCommand.Parameters.AddWithValue("@category", title.Content);
+            myCommand.Parameters.AddWithValue("@sum_type", 1);
+            var result = myCommand.ExecuteNonQuery();
+            databaseObject.CloseConnection();
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)

@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Runtime.CompilerServices;
+using System.Data.SQLite;
 
 
 
@@ -53,6 +54,15 @@ namespace AttendanceTracker
             currentPanel.Children.Add(customCounter);
         }
 
-        
+        private void clearDatabase_Click(object sender, RoutedEventArgs e)
+        {
+            Database databaseObject = new Database();
+            
+            string query = "DELETE FROM attendance";
+            SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
+            databaseObject.OpenConnection();
+            myCommand.ExecuteNonQuery();
+            databaseObject.CloseConnection();
+        }
     }
 }
