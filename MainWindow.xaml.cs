@@ -15,8 +15,10 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Runtime.CompilerServices;
 using System.Data.SQLite;
-
-
+using System.IO;
+using Excel = Microsoft.Office.Interop.Excel;
+using System.Data.Entity;
+using System.Data.SqlClient;
 
 namespace AttendanceTracker
 {
@@ -24,13 +26,8 @@ namespace AttendanceTracker
     /// Interaction logic for MainWindow.xaml
     /// </summary>
    
-    // The process of creating counters should probably be generalized so that they can be recreated 
-    // easier, and so I don't have to rewrite so much code. This xaml file should deal with the main
-    // interactions with the page, but it should not include the logic for all counters. This file is going
-    // to get very long and messy real quick. Its possible that c# and WPF forms were not designed for reusable
-    // componenets at all
-    // Look into Control Templates
-    public partial class MainWindow : Window
+    
+    public partial class MainWindow : System.Windows.Window
     {
 
         StackPanel currentPanel;
@@ -58,11 +55,49 @@ namespace AttendanceTracker
         {
             Database databaseObject = new Database();
             
+            // this type of execution for sql commands can be done through a method
+            // maybe just put the query as a string input
             string query = "DELETE FROM attendance";
             SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
             databaseObject.OpenConnection();
             myCommand.ExecuteNonQuery();
             databaseObject.CloseConnection();
+        }
+
+        // unfortunately, this will not be like a simple browser download. May need to specify some
+        // directory for them to go to. Perhaps they can be added to a file on the desktop
+        private void exportData_Click(object sender, RoutedEventArgs e)
+        {
+
+
+            Database databaseObject = new Database();
+            
+            string query = "SELECT * FROM attendance";
+            SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
+            databaseObject.OpenConnection();
+
+            SQLiteDataReader reader = myCommand.ExecuteReader();
+            string fileName = "test.csv";
+            StreamWriter sw = new StreamWriter(fileName);
+            object[] output = new object[reader.FieldCount];
+
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                output[i] = reader.GetName(i);
+            }
+
+            sw.WriteLine(string.Join(",", output));
+
+            while (reader.Read())
+            {
+                reader.GetValues(output);
+                sw.WriteLine(string.Join(",", output));
+            }
+
+            sw.Close();
+            reader.Close();
+            databaseObject.CloseConnection();  
+           
         }
     }
 }

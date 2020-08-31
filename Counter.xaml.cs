@@ -44,7 +44,7 @@ namespace AttendanceTracker
             set
             {
                 SetValue(CounterTitleProperty, value);
-                title.Content = value;
+                title.Text = value;
             }
         }
 
@@ -79,7 +79,7 @@ namespace AttendanceTracker
             SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
             databaseObject.OpenConnection();
             myCommand.Parameters.AddWithValue("@timestamp", DateTime.Now);
-            myCommand.Parameters.AddWithValue("@category", title.Content);
+            myCommand.Parameters.AddWithValue("@category", title.Text);
             myCommand.Parameters.AddWithValue("@sum_type", 1);
             var result = myCommand.ExecuteNonQuery();
             databaseObject.CloseConnection();
