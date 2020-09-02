@@ -75,6 +75,7 @@ namespace AttendanceTracker
             generalTimestampLog.Text += totalVisitors + " - " + DateTime.Now + logNote + "\n";
 
             // insert into database
+            // need to increment an id for each entry
             string query = "INSERT INTO attendance ('timestamp', 'category', 'sum_type') VALUES (@timestamp, @category, @sum_type)";
             SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
             databaseObject.OpenConnection();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Data.SQLite;
 using System.IO;
+using System.Data.SqlClient;
 
 namespace AttendanceTracker
 {
@@ -15,11 +16,20 @@ namespace AttendanceTracker
 
         public Database()
         {
+            // this creates a new database, but it doesn't create any tables in
+            // the database
             myConnection = new SQLiteConnection("Data Source=database.sqlite3");
             if (!File.Exists("./database.sqlite3"))
             {
                 SQLiteConnection.CreateFile("database.sqlite3");
             }
+
+            // should probably initialize the database here
+            string query = "CREATE TABLE IF NOT EXISTS attendance (id INTEGER PRIMARY KEY, timestamp DATETIME, category TEXT, log_notes TEXT, sum_type INT)";
+            myConnection.Open();
+            SQLiteCommand myCommand = new SQLiteCommand(query, myConnection);
+            myCommand.ExecuteNonQuery();
+            myConnection.Close();
             
         }
 
