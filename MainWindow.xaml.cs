@@ -66,6 +66,10 @@ namespace AttendanceTracker
 
         // unfortunately, this will not be like a simple browser download. May need to specify some
         // directory for them to go to. Perhaps they can be added to a file on the desktop
+        // also need to add funtionality so that user can select which days they would like to export from
+        // probably use date picker control and have a calendar be a dropdown. Then the SQL query can only 
+        // include pieces of data WHERE timestamp is greater than selected start date and less than selected
+        // end date
         private void exportData_Click(object sender, RoutedEventArgs e)
         {
 
