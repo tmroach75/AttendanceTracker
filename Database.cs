@@ -14,17 +14,16 @@ namespace AttendanceTracker
     {
         public SQLiteConnection myConnection;
 
+        // constructs a new SQLite database object
         public Database()
         {
-            // this creates a new database, but it doesn't create any tables in
-            // the database
             myConnection = new SQLiteConnection("Data Source=database.sqlite3");
             if (!File.Exists("./database.sqlite3"))
             {
                 SQLiteConnection.CreateFile("database.sqlite3");
             }
 
-            // should probably initialize the database here
+            // initializes a table in the database if one is not present on the user's machine
             string query = "CREATE TABLE IF NOT EXISTS attendance (id INTEGER PRIMARY KEY, timestamp DATETIME, category TEXT, log_notes TEXT, sum_type INT)";
             myConnection.Open();
             SQLiteCommand myCommand = new SQLiteCommand(query, myConnection);
@@ -33,6 +32,7 @@ namespace AttendanceTracker
             
         }
 
+        // opens a connection to the SQLite database
         public void OpenConnection()
         {
             if (myConnection.State != System.Data.ConnectionState.Open)
@@ -41,6 +41,7 @@ namespace AttendanceTracker
             }
         }
 
+        // closes the connection to the SQLite database
         public void CloseConnection()
         {
             if (myConnection.State != System.Data.ConnectionState.Closed)

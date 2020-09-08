@@ -16,7 +16,6 @@ using System.Windows.Shapes;
 using System.Runtime.CompilerServices;
 using System.Data.SQLite;
 using System.IO;
-using Excel = Microsoft.Office.Interop.Excel;
 using System.Data.Entity;
 using System.Data.SqlClient;
 
@@ -51,6 +50,7 @@ namespace AttendanceTracker
             currentPanel.Children.Add(customCounter);
         }
 
+        // deletes all records from the database
         private void clearDatabase_Click(object sender, RoutedEventArgs e)
         {
             Database databaseObject = new Database();
@@ -64,16 +64,9 @@ namespace AttendanceTracker
             databaseObject.CloseConnection();
         }
 
-        // unfortunately, this will not be like a simple browser download. May need to specify some
-        // directory for them to go to. Perhaps they can be added to a file on the desktop
-        // also need to add funtionality so that user can select which days they would like to export from
-        // probably use date picker control and have a calendar be a dropdown. Then the SQL query can only 
-        // include pieces of data WHERE timestamp is greater than selected start date and less than selected
-        // end date
+        // this could use some helper methods
         private void exportData_Click(object sender, RoutedEventArgs e)
         {
-
-
             Database databaseObject = new Database();
             
             string query = "SELECT * FROM attendance";
@@ -100,8 +93,40 @@ namespace AttendanceTracker
 
             sw.Close();
             reader.Close();
-            databaseObject.CloseConnection();  
-           
+            databaseObject.CloseConnection();   
+        }
+
+        // formats database data into the standard attendance reporting format used by the VIC
+        private void getReportFormat_Click(object sender, RoutedEventArgs e)
+        {
+            int eightToTen = GetTimeRangeSum(2020, 9, 7, 8, 30, 10);
+        }
+
+        // need a date range, which can come from a calendar pop up
+        // combine the date with the time to make a new DateTime
+        private int GetTimeRangeSum(int year, int month, int day, int beginningHour, int beginningMinutes, int endingHour)
+        {
+            DateTime selectedBeginningDate = (DateTime)BeginningDate.SelectedDate;
+            DateTime selectedEndingDate = (DateTime)EndingDate.SelectedDate;
+
+            DateTime lowerBoundTime = new DateTime(year, month, day, beginningHour, beginningMinutes, 0);
+            DateTime upperBoundTime = new DateTime(year, month, day, endingHour, 0, 0);
+            Database databaseObject = new Database();
+            string query = "SELECT SUM(sum_type) FROM attendance WHERE timestamp >= '" + lowerBoundTime + "' AND timestamp < '" + upperBoundTime + "'"; // this could possibly lead to a negative sum if only subtracted. So if negative, we want to set to 0
+            SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
+            databaseObject.OpenConnection();
+            SQLiteDataReader reader = myCommand.ExecuteReader();
+            int sum = 0;
+            // this works, but I'm not sure if it does for the right reasons
+            if (reader.Read().GetType().IsPrimitive)
+            {
+                if (reader.Read() && reader.GetInt32(0) >= 0)
+                {
+                    sum = reader.GetInt32(0);
+                }
+            }
+            databaseObject.CloseConnection();
+            return sum;
         }
     }
 }
