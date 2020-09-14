@@ -18,6 +18,7 @@ using System.Data.SQLite;
 using System.IO;
 using System.Data.Entity;
 using System.Data.SqlClient;
+using System.Data;
 
 namespace AttendanceTracker
 {
@@ -97,35 +98,88 @@ namespace AttendanceTracker
         }
 
         // formats database data into the standard attendance reporting format used by the VIC
+        // need to get report format for each day in the selected range. This means the CSV that
+        // I export will have several rows
+        // this will probably involve a loop of some kind
+        // first, get summing to work for just one day
+        // also need it to be generalized for which category I'm getting. This may need to be very specific for the terms of the visitor center format
+        //
+        // for now...might be smart to only have functionality for one day
+        //      
         private void getReportFormat_Click(object sender, RoutedEventArgs e)
         {
-            int eightToTen = GetTimeRangeSum(2020, 9, 7, 8, 30, 10);
+            if (BeginningDate.SelectedDate.HasValue)
+            {
+                DateTime selectedBeginningDate = (DateTime)BeginningDate.SelectedDate;
+                //DateTime selectedEndingDate = (DateTime)EndingDate.SelectedDate;
+
+                // gets the time for each time range. Perhaps this can be done in a loop and added to a list of some kind to reduce redundancy, but that
+                // might be a little over-engineering things
+                
+                int eightToTen = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 10, "");
+                int tenToEleven = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 10, 0, 11, "");
+                int elevenToTwelve = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 11, 0, 12, "");
+                int twelveToOne = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 12, 0, 13, "");
+                int oneToTwo = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 13, 0, 14, "");
+                int twoToThree = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 14, 0, 15, "");
+                int threeToFour = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 15, 0, 16, "");
+                int fourToFive = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 16, 0, 17, "");
+                int maps = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 17, "Maps");
+                int general = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 17, "General");
+                int prospective = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 17, "Prospective");
+                int staff = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 17, "Faculty/Staff");
+                
+
+                string fileName = selectedBeginningDate.Year.ToString() + "-" + selectedBeginningDate.Month.ToString() + "-" + selectedBeginningDate.Day.ToString() + ".csv";
+                StreamWriter sw = new StreamWriter(fileName);
+
+                
+                sw.WriteLine("8:30-10:00 AM, 10:00-11:00 AM, 11:00-12:00 PM, 12:00-1:00 PM, 1:00-2:00 PM, 2:00-3:00 PM, 3:00-4:00 PM, 4:00-5:00 PM, Gen Visitor, Pro Student, Faculty/Staff");
+                sw.WriteLine(eightToTen + "," + tenToEleven + "," + elevenToTwelve + "," + twelveToOne + "," + oneToTwo + "," + twoToThree + "," + threeToFour + "," + fourToFive + "," + maps + "," + general + "," + prospective + "," + staff);
+                sw.Close();
+            } else
+            {
+                MessageBox.Show("No starting date was selected", "Attendance Tracker", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        // need a date range, which can come from a calendar pop up
-        // combine the date with the time to make a new DateTime
-        private int GetTimeRangeSum(int year, int month, int day, int beginningHour, int beginningMinutes, int endingHour)
+        // returns the amount of visitors for a specified time range
+        private int GetTimeRangeSum(int year, int month, int day, int beginningHour, int beginningMinutes, int endingHour, string category)
         {
-            DateTime selectedBeginningDate = (DateTime)BeginningDate.SelectedDate;
-            DateTime selectedEndingDate = (DateTime)EndingDate.SelectedDate;
-
             DateTime lowerBoundTime = new DateTime(year, month, day, beginningHour, beginningMinutes, 0);
             DateTime upperBoundTime = new DateTime(year, month, day, endingHour, 0, 0);
+
             Database databaseObject = new Database();
-            string query = "SELECT SUM(sum_type) FROM attendance WHERE timestamp >= '" + lowerBoundTime + "' AND timestamp < '" + upperBoundTime + "'"; // this could possibly lead to a negative sum if only subtracted. So if negative, we want to set to 0
+
+            string query = "";
+            if (category.Length <= 0)
+            {
+                query = "SELECT COALESCE(SUM(sum_type),0) FROM attendance WHERE category != 'Maps' AND timestamp >= '" + lowerBoundTime.ToString("yyyy-MM-dd HH:mm:ss") + "' AND timestamp < '" + upperBoundTime.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+            } else
+            {
+                query = "SELECT COALESCE(SUM(sum_type),0) FROM attendance WHERE category = '" + category + "' AND timestamp >= '" + lowerBoundTime.ToString("yyyy-MM-dd HH:mm:ss") + "' AND timestamp < '" + upperBoundTime.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+            }
+                
+            
             SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
             databaseObject.OpenConnection();
             SQLiteDataReader reader = myCommand.ExecuteReader();
+
             int sum = 0;
-            // this works, but I'm not sure if it does for the right reasons
-            if (reader.Read().GetType().IsPrimitive)
+            
+            if(reader.Read())
             {
-                if (reader.Read() && reader.GetInt32(0) >= 0)
-                {
-                    sum = reader.GetInt32(0);
-                }
+                sum = reader.GetInt32(0);
             }
+
+            
             databaseObject.CloseConnection();
+
+            if (sum < 0)
+            {
+                sum = 0;
+            }
+
             return sum;
         }
     }

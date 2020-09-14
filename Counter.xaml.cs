@@ -88,7 +88,7 @@ namespace AttendanceTracker
 
             // insert into database
             string query = "INSERT INTO attendance ('timestamp', 'category', 'sum_type') VALUES (@timestamp, @category, @sum_type)";
-            insertIntoDatabase(query, 1);
+            insertIntoDatabase(query, sumType);
         }
 
         
