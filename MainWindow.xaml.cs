@@ -25,8 +25,6 @@ namespace AttendanceTracker
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-   
-    
     public partial class MainWindow : System.Windows.Window
     {
 
@@ -54,29 +52,40 @@ namespace AttendanceTracker
         // deletes all records from the database
         private void clearDatabase_Click(object sender, RoutedEventArgs e)
         {
-            Database databaseObject = new Database();
-            
-            // this type of execution for sql commands can be done through a method
-            // maybe just put the query as a string input
-            string query = "DELETE FROM attendance";
-            SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
-            databaseObject.OpenConnection();
-            myCommand.ExecuteNonQuery();
-            databaseObject.CloseConnection();
+            string warningMessage = "WARNING: You are about to delete your database. All records will be lost, and " +
+                "this action cannot be undone. Are you sure you want to delete your database?";
+            if (MessageBox.Show(warningMessage, "Attendance Tracker", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                Database databaseObject = new Database();
+
+                // this type of execution for sql commands can be done through a method
+                // maybe just put the query as a string input
+                string query = "DELETE FROM attendance";
+                SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
+                databaseObject.OpenConnection();
+                myCommand.ExecuteNonQuery();
+                databaseObject.CloseConnection();
+            }
+
+       
         }
 
         // this could use some helper methods
         private void exportData_Click(object sender, RoutedEventArgs e)
         {
+            string path = Environment.CurrentDirectory + "\\Database_Exports";
+            Directory.CreateDirectory(path);
+
             Database databaseObject = new Database();
             
+            // this could go in a helper method -- 
             string query = "SELECT * FROM attendance";
             SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
             databaseObject.OpenConnection();
 
             SQLiteDataReader reader = myCommand.ExecuteReader();
-            string fileName = "test.csv";
-            StreamWriter sw = new StreamWriter(fileName);
+            string fileName = "Database_" + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Day.ToString()  + "_" + DateTime.Now.TimeOfDay.TotalSeconds.ToString() + ".csv";
+            StreamWriter sw = new StreamWriter(System.IO.Path.Combine(path, fileName));
             object[] output = new object[reader.FieldCount];
 
             for (int i = 0; i < reader.FieldCount; i++)
@@ -128,13 +137,16 @@ namespace AttendanceTracker
                 int general = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 17, "General");
                 int prospective = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 17, "Prospective");
                 int staff = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 17, "Faculty/Staff");
-                
+
+
+                // this could probably go in its own method
+                string path = Environment.CurrentDirectory + "\\Daily_Summary_Reports";
+                Directory.CreateDirectory(path);
 
                 string fileName = selectedBeginningDate.Year.ToString() + "-" + selectedBeginningDate.Month.ToString() + "-" + selectedBeginningDate.Day.ToString() + ".csv";
-                StreamWriter sw = new StreamWriter(fileName);
+                StreamWriter sw = new StreamWriter(System.IO.Path.Combine(path, fileName));
 
-                
-                sw.WriteLine("8:30-10:00 AM, 10:00-11:00 AM, 11:00-12:00 PM, 12:00-1:00 PM, 1:00-2:00 PM, 2:00-3:00 PM, 3:00-4:00 PM, 4:00-5:00 PM, Gen Visitor, Pro Student, Faculty/Staff");
+                sw.WriteLine("8:30-10:00 AM, 10:00-11:00 AM, 11:00-12:00 PM, 12:00-1:00 PM, 1:00-2:00 PM, 2:00-3:00 PM, 3:00-4:00 PM, 4:00-5:00 PM, Maps, Gen Visitor, Pro Student, Faculty/Staff");
                 sw.WriteLine(eightToTen + "," + tenToEleven + "," + elevenToTwelve + "," + twelveToOne + "," + oneToTwo + "," + twoToThree + "," + threeToFour + "," + fourToFive + "," + maps + "," + general + "," + prospective + "," + staff);
                 sw.Close();
             } else

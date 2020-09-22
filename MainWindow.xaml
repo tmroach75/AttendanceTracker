@@ -14,14 +14,16 @@
         </ScrollViewer>
 
 
-        <Button x:Name="generateNewCounter" Content="Generate New Counter" HorizontalAlignment="Left" Margin="551,10,0,0" VerticalAlignment="Top" Click="generateNewCounter_Click"/>
+        <Button x:Name="generateNewCounter" Content="Generate New Counter +" HorizontalAlignment="Left" Margin="551,10,0,0" VerticalAlignment="Top" BorderBrush="#4b2e83" FontWeight="ExtraBold" BorderThickness="5" Click="generateNewCounter_Click"/>
         <Button x:Name="clearDatabase" Content="Clear Database" FontWeight="ExtraBold" HorizontalAlignment="Left" Margin="551,86,0,0" VerticalAlignment="Top" BorderBrush="Red" BorderThickness="5" Click="clearDatabase_Click"/>
         <Button x:Name="exportData" Content="Export Database" FontWeight="ExtraBold" HorizontalAlignment="Left" Margin="551,50,0,0" VerticalAlignment="Top" BorderBrush="Green" BorderThickness="5" Click="exportData_Click"/>
-        <Button x:Name="getReportFormat" Content="Get Report Format" FontWeight="ExtraBold" HorizontalAlignment="Left" Margin="551,256,0,0" VerticalAlignment="Top" BorderBrush="Green" BorderThickness="5" Click="getReportFormat_Click"/>
-        <Label Content="Starting Date" FontWeight="ExtraBold" Margin="546,130,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Button x:Name="getReportFormat" Content="Get Report Format" FontWeight="ExtraBold" HorizontalAlignment="Left" Margin="551,200,0,0" VerticalAlignment="Top" BorderBrush="Green" BorderThickness="5" Click="getReportFormat_Click"/>
+        <Label Content="Export Date" FontWeight="ExtraBold" Margin="546,130,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <DatePicker x:Name="BeginningDate" Text="Select a starting date"  Height="25" Width="110" Margin="551,157,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        
+        <!-- The following components to be added at a later date
         <Label Content="Ending Date" FontWeight="ExtraBold" Margin="546,187,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <DatePicker x:Name="EndingDate" Text="Select a starting date"  Height="25" Width="110" Margin="551,215,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-
+        -->
     </Grid>
 </Window>
