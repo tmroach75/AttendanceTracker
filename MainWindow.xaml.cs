@@ -19,6 +19,9 @@ using System.IO;
 using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Data;
+using System.Xml;
+using System.Windows.Markup;
+using System.Media;
 
 namespace AttendanceTracker
 {
@@ -37,7 +40,11 @@ namespace AttendanceTracker
             currentPanel.Orientation = System.Windows.Controls.Orientation.Horizontal;
             CounterStackPanel.Children.Add(currentPanel);
         }
-        private void generateNewCounter_Click(object sender, RoutedEventArgs e)
+
+        /*
+         * creates a new counter when user clicks on "Generate New Counter" button 
+        */
+        private void GenerateNewCounter_Click(object sender, RoutedEventArgs e)
         {
             Counter customCounter = new Counter();
             if (currentPanel.Children.Count == 2)
@@ -49,8 +56,10 @@ namespace AttendanceTracker
             currentPanel.Children.Add(customCounter);
         }
 
-        // deletes all records from the database
-        private void clearDatabase_Click(object sender, RoutedEventArgs e)
+        /*
+         * deletes all records from the database
+        */
+        private void ClearDatabase_Click(object sender, RoutedEventArgs e)
         {
             string warningMessage = "WARNING: You are about to delete your database. All records will be lost, and " +
                 "this action cannot be undone. Are you sure you want to delete your database?";
@@ -66,26 +75,26 @@ namespace AttendanceTracker
                 myCommand.ExecuteNonQuery();
                 databaseObject.CloseConnection();
             }
-
-       
         }
 
-        // this could use some helper methods
-        private void exportData_Click(object sender, RoutedEventArgs e)
+        /*
+         * exports attendance table from database to csv format
+        */
+        private void ExportData_Click(object sender, RoutedEventArgs e)
         {
+            // needs to go in create directory method
             string path = Environment.CurrentDirectory + "\\Database_Exports";
             Directory.CreateDirectory(path);
+            string fileName = "Database_" + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Day.ToString() + "_" + DateTime.Now.TimeOfDay.TotalSeconds.ToString() + ".csv";
+            StreamWriter sw = new StreamWriter(System.IO.Path.Combine(path, fileName));
 
+            // need two methods. One to deal with database query, one to deal with these loops
             Database databaseObject = new Database();
-            
-            // this could go in a helper method -- 
             string query = "SELECT * FROM attendance";
             SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
             databaseObject.OpenConnection();
-
             SQLiteDataReader reader = myCommand.ExecuteReader();
-            string fileName = "Database_" + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Day.ToString()  + "_" + DateTime.Now.TimeOfDay.TotalSeconds.ToString() + ".csv";
-            StreamWriter sw = new StreamWriter(System.IO.Path.Combine(path, fileName));
+            
             object[] output = new object[reader.FieldCount];
 
             for (int i = 0; i < reader.FieldCount; i++)
@@ -103,28 +112,21 @@ namespace AttendanceTracker
 
             sw.Close();
             reader.Close();
-            databaseObject.CloseConnection();   
+            databaseObject.CloseConnection();
+            SaveCounters();
         }
 
-        // formats database data into the standard attendance reporting format used by the VIC
-        // need to get report format for each day in the selected range. This means the CSV that
-        // I export will have several rows
-        // this will probably involve a loop of some kind
-        // first, get summing to work for just one day
-        // also need it to be generalized for which category I'm getting. This may need to be very specific for the terms of the visitor center format
-        //
-        // for now...might be smart to only have functionality for one day
-        //      
-        private void getReportFormat_Click(object sender, RoutedEventArgs e)
+        /*
+         * tallys attendance counts and exports a summary table of attendance per hour    
+        */
+        private void GetReportFormat_Click(object sender, RoutedEventArgs e)
         {
+            // checks if user selected a date
             if (BeginningDate.SelectedDate.HasValue)
             {
                 DateTime selectedBeginningDate = (DateTime)BeginningDate.SelectedDate;
-                //DateTime selectedEndingDate = (DateTime)EndingDate.SelectedDate;
 
-                // gets the time for each time range. Perhaps this can be done in a loop and added to a list of some kind to reduce redundancy, but that
-                // might be a little over-engineering things
-                
+                // gets the time for each time range
                 int eightToTen = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 10, "");
                 int tenToEleven = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 10, 0, 11, "");
                 int elevenToTwelve = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 11, 0, 12, "");
@@ -138,8 +140,7 @@ namespace AttendanceTracker
                 int prospective = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 17, "Prospective");
                 int staff = GetTimeRangeSum(selectedBeginningDate.Year, selectedBeginningDate.Month, selectedBeginningDate.Day, 8, 30, 17, "Faculty/Staff");
 
-
-                // this could probably go in its own method
+                // this could probably go in its own method -- create directory maybe?
                 string path = Environment.CurrentDirectory + "\\Daily_Summary_Reports";
                 Directory.CreateDirectory(path);
 
@@ -155,14 +156,19 @@ namespace AttendanceTracker
             }
         }
 
-        // returns the amount of visitors for a specified time range
+        /*
+         * returns the amount of visitors for a specified time range
+         * @ param year - the selected year
+         * @ param month - the selected month
+         * @ param beginningHour - the lower bound hour for the selected time period
+         * @ param beginningMinutes - the number of minutes for the lower bound for the selected time (ex. 8:30)
+         * @ param endingHour - the upper bound hour for the selected time period
+         * @ param
+        */
         private int GetTimeRangeSum(int year, int month, int day, int beginningHour, int beginningMinutes, int endingHour, string category)
         {
             DateTime lowerBoundTime = new DateTime(year, month, day, beginningHour, beginningMinutes, 0);
             DateTime upperBoundTime = new DateTime(year, month, day, endingHour, 0, 0);
-
-            Database databaseObject = new Database();
-
             string query = "";
             if (category.Length <= 0)
             {
@@ -171,28 +177,80 @@ namespace AttendanceTracker
             {
                 query = "SELECT COALESCE(SUM(sum_type),0) FROM attendance WHERE category = '" + category + "' AND timestamp >= '" + lowerBoundTime.ToString("yyyy-MM-dd HH:mm:ss") + "' AND timestamp < '" + upperBoundTime.ToString("yyyy-MM-dd HH:mm:ss") + "'";
             }
-                
-            
+
+            return GetSumTypeSum(query);
+        }
+
+        /*
+         * returns the sum of the sum_type column from the attendance table in the database
+         * @param query - the SQL query to be executed
+        */
+        private int GetSumTypeSum(string query)
+        {
+            Database databaseObject = new Database();
             SQLiteCommand myCommand = new SQLiteCommand(query, databaseObject.myConnection);
             databaseObject.OpenConnection();
             SQLiteDataReader reader = myCommand.ExecuteReader();
-
             int sum = 0;
-            
-            if(reader.Read())
+            if (reader.Read())
             {
                 sum = reader.GetInt32(0);
             }
-
-            
             databaseObject.CloseConnection();
-
             if (sum < 0)
             {
                 sum = 0;
             }
-
             return sum;
         }
+
+        // https://social.msdn.microsoft.com/Forums/vstudio/en-US/65a2064f-2d6a-4ecc-8076-60c72cb7070d/wpf-c-save-controls-created-at-runtime?forum=wpf
+        // check the above link for example code of how to save user controls as XML serialization
+        private void SaveCounters()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.OmitXmlDeclaration = true;
+            settings.NewLineOnAttributes = true;
+
+            XamlDesignerSerializationManager dsm = new XamlDesignerSerializationManager(XmlWriter.Create(sb, settings));
+            dsm.XamlWriterMode = XamlWriterMode.Expression;
+
+            XamlWriter.Save(CounterStackPanel, dsm);
+            string savedControls = sb.ToString();
+
+            File.WriteAllText(@"LastSession.xaml", savedControls);
+        }
+
+        private void ReloadCounters(object sender, RoutedEventArgs e)
+        {
+            StreamReader reader = new StreamReader(@"LastSession.xaml");
+            string text = reader.ReadToEnd();
+            reader.Close();
+
+            StringReader strReader = new StringReader(text);
+            XmlReader xmlReader = XmlReader.Create(strReader);
+
+            StackPanel sp = (StackPanel)System.Windows.Markup.XamlReader.Load(xmlReader);
+
+            foreach(FrameworkElement child in sp.Children)
+            {
+                CounterStackPanel.Children.Add(CloneFrameworkElement(child));
+            }
+        }
+
+        FrameworkElement CloneFrameworkElement(FrameworkElement originalElement)
+        {
+            string elementString = XamlWriter.Save(originalElement);
+
+            StringReader stringReader = new StringReader(elementString);
+            XmlReader xmlReader = XmlReader.Create(stringReader);
+            FrameworkElement clonedElement = (FrameworkElement)XamlReader.Load(xmlReader);
+
+            return clonedElement;
+        }
+
     }
 }
